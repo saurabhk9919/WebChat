@@ -2,11 +2,13 @@ import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import userRoute from './route/user.route.js';
+import cors from 'cors';//is a type of middleware that can be used to enable CORS with various options.
 
 const app = express();
 dotenv.config();
 
 app.use(express.json())
+app.use(cors());
 
 const PORT = process.env.PORT || 5001;
 const URI=process.env.MONGO_URI;

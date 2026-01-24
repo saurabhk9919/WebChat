@@ -2,12 +2,12 @@ import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import { createTokenandSaveCookie } from "../jwt/generateToken.js";
 
-/* ===================== SIGNUP ===================== */
+//signup
 export const signup = async (req, res) => {
   try {
-    const { fullname, email, password, confirmpassword } = req.body;
+    const { name, email, password, confirmpassword } = req.body;
 
-    if (!fullname || !email || !password || !confirmpassword) {
+    if (!name || !email || !password || !confirmpassword) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -23,7 +23,7 @@ export const signup = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await User.create({
-      name: fullname,
+      name,
       email,
       password: hashedPassword,
     });
@@ -44,7 +44,7 @@ export const signup = async (req, res) => {
   }
 };
 
-/* ===================== LOGIN ===================== */
+//login
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
