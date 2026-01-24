@@ -2,6 +2,7 @@ import React from 'react'
 import { useForm } from 'react-hook-form'
 import axios from 'axios';
 import { useAuth } from '../context/AuthProvider.jsx';
+import { Link } from 'react-router-dom';
 
 export default function Signup() {
   const { authUser, setAuthUser } = useAuth();
@@ -25,7 +26,7 @@ export default function Signup() {
       confirmpassword:data.confirmPassword
     };
     //Sending data to backend
-    await axios.post("http://localhost:5002/users/signup",userInfo)
+    await axios.post("/api/users/signup",userInfo)
     .then((response)=>{
         console.log("Signup successful", response.data);
         if(response.status === 201){
@@ -120,7 +121,7 @@ export default function Signup() {
         </form>
 
         <p className="text-center text-slate-400 mt-4">
-          Already have an account? <a href="#" className="text-blue-400 hover:text-blue-300 underline">Login</a>
+          Already have an account? <Link to="/login" className="text-blue-400 hover:text-blue-300 underline">Login</Link>
         </p>
       </div>
     </div>

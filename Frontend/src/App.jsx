@@ -5,6 +5,7 @@ import Logout from './home/left1/Logout.jsx'
 import Signup from './component/Signup.jsx'
 import Login from './component/Login.jsx'
 import { useAuth } from './context/AuthProvider.jsx';
+import { Navigate, Route, Routes} from 'react-router-dom';
 
 const App = () => {
   const {authUser, setAuthUser} = useAuth();
@@ -13,14 +14,28 @@ const App = () => {
   return (
     
     <>
-  {/* <div className='flex w-full h-screen'>
+    <Routes>
+      <Route path="/" 
+      element={
+        authUser ? (
+        <div className='flex w-full h-screen'>
     <Logout></Logout>
     <Left></Left>
     <Right></Right> 
- </div> */}
+ </div>
+ ): (
+ <Navigate to="/login"/>
+        )
+      } />
+      <Route path="/login" 
+       element={authUser
+         ? <Navigate to={"/"}/> : <Login/>}/>
 
- {/* <Signup></Signup> */}
-  <Login></Login>
+      <Route path="/signup"
+       element={authUser 
+       ? <Navigate to={"/"}/> : <Signup/>}/>
+      
+    </Routes>
      </> 
   )
 }

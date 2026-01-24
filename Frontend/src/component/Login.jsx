@@ -2,6 +2,7 @@ import React from 'react'
 import { useForm } from 'react-hook-form'
 import axios from 'axios';
 import { useAuth } from '../context/AuthProvider.jsx';
+import { Link } from 'react-router-dom';
 
 
 export default function Login() {
@@ -21,7 +22,7 @@ const onSubmit = (data) => {
      
     };
     //Sending data to backend
-    axios.post("http://localhost:5002/users/login",userInfo)
+    axios.post("/api/users/login",userInfo)
     .then((response)=>{
         console.log("Login successful", response.data);
         if(response.status === 200){
@@ -79,7 +80,7 @@ const onSubmit = (data) => {
         </form>
 
         <p className="text-center text-slate-400 mt-4">
-          Don't have an account? <a href="#" className="text-blue-400 hover:text-blue-300 underline">Sign Up</a>
+          Don't have an account? <Link to="/signup" className="text-blue-400 hover:text-blue-300 underline">Sign Up</Link>
         </p>
       </div>
     </div>
