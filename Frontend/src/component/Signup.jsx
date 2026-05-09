@@ -3,20 +3,19 @@ import { useForm } from 'react-hook-form'
 import axios from 'axios';
 import { useAuth } from '../context/AuthProvider.jsx';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 export default function Signup() {
-  const { authUser, setAuthUser } = useAuth();
+  const { setAuthUser } = useAuth();
   const {
     register,
     handleSubmit,
-    watch,
+    getValues,
     formState: { errors },
   } = useForm();
 
-    const password = watch('password', '');
-    const confirmPassword = watch('confirmPassword', '');
   const validatePasswordMatch = (value) => {
-    return value === password || "Passwords do not match";
+    return value === getValues('password') || "Passwords do not match";
   }
   const onSubmit = async (data) => {
     const userInfo={
@@ -26,20 +25,22 @@ export default function Signup() {
       confirmpassword:data.confirmPassword
     };
     //Sending data to backend
-    await axios.post("/api/users/signup",userInfo)
+    await axios.post("/api/users/signup",userInfo, {
+      withCredentials: true
+    })
     .then((response)=>{
         console.log("Signup successful", response.data);
         if(response.status === 201){
-          alert("Signup successful! Please login.");
+          toast.success("Signup successful! Loading your chats...");
         }
         localStorage.setItem("userInfo", JSON.stringify(response.data.user));
-        setAuthUser(response.data);
+        setAuthUser(response.data.user);
 
     }).catch((error)=>{
       if (error.response) {
-        alert("There was an error during signup! " + (error.response.data?.message || "Please try again."));
+        toast.error("There was an error during signup! " + (error.response.data?.message || "Please try again."));
       } else {
-        alert("There was an error during signup! Please try again.");
+        toast.error("There was an error during signup! Please try again.");
       }
     });
   };

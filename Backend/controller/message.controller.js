@@ -1,5 +1,6 @@
 import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
+import { io, getRecieverSocketId } from "../SocketIO/server.js";
 
 export const sendMessage = async (req, res) => {
    // console.log("Send message controller",req.params.id, req.body.message);
@@ -17,19 +18,32 @@ export const sendMessage = async (req, res) => {
                 participants: [senderId, recieverId],
             
             }); 
-            const newMessage = new Message({
-                 senderId,
-                 recieverId,
-            message,
-   });
-   if(newMessage){
-    conversation.messages.push(newMessage._id);
-   }
-   //save both
-   await Promise.all([  newMessage.save(), conversation.save() ]);
- return res.status(200).json({ message: "Message sent successfully", newMessage });
+        }
+        
+        const newMessage = new Message({
+             senderId,
+             recieverId,
+        message,
+        });
+        if(newMessage){
+            conversation.messages.push(newMessage._id);
+        }
+        //save both
+        await Promise.all([  newMessage.save(), conversation.save() ]);//save both message and conversation on database
+        const recieverSocketId = getRecieverSocketId(recieverId);
+        if(recieverSocketId){
+            io.to(recieverSocketId).emit("newMessage", {
+                _id: newMessage._id,
+                senderId: newMessage.senderId,
+                recieverId: newMessage.recieverId,
+                message: newMessage.message,
+                createdAt: newMessage.createdAt,
+                updatedAt: newMessage.updatedAt
+            });
         }
 
+
+        return res.status(201).json({ message: "Message sent successfully", newMessage });
     }
     catch(err){
         console.log("Error in sending message", err);

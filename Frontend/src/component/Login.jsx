@@ -3,10 +3,11 @@ import { useForm } from 'react-hook-form'
 import axios from 'axios';
 import { useAuth } from '../context/AuthProvider.jsx';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 
 export default function Login() {
-  const {authUser, setAuthUser } = useAuth();
+  const { setAuthUser } = useAuth();
 
    const {
       register,
@@ -22,19 +23,21 @@ const onSubmit = (data) => {
      
     };
     //Sending data to backend
-    axios.post("/api/users/login",userInfo)
+    axios.post("/api/users/login",userInfo, {
+      withCredentials: true
+    })
     .then((response)=>{
         console.log("Login successful", response.data);
         if(response.status === 200){
-          alert("Login successful! Welcome back.");
+          toast.success("Login successful! Welcome back.");
         }
         localStorage.setItem("userInfo", JSON.stringify(response.data.user));
-        setAuthUser(response.data);
+        setAuthUser(response.data.user);
     }).catch((error)=>{
       if (error.response) {
-        alert("There was an error during login! " + (error.response.data?.message || "Please try again."));
+        toast.error("There was an error during login! " + (error.response.data?.message || "Please try again."));
       } else {
-        alert("There was an error during login! Please try again.");
+        toast.error("There was an error during login! Please try again.");
       }
     });
   };

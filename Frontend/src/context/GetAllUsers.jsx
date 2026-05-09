@@ -1,32 +1,36 @@
 import React from 'react'
 import { useEffect } from 'react'
-import Cookies from 'js-cookie';
 import axios from 'axios';
+import { useAuth } from './AuthProvider.jsx';
+import { useNavigate } from 'react-router-dom';
 
 function GetAllUsers() {
+    const { setAuthUser } = useAuth();
+    const navigate = useNavigate();
     const [allUsers, setAllUsers] = React.useState([]);
-    const [loading, setLoading] = React.useState([]);
+    const [loading, setLoading] = React.useState(false);
     useEffect(() => {
         const fetchUsers = async () => {
             setLoading(true);
             try {
-                const token = Cookies.get("jwt");
-                const response = await axios.get("http://localhost:5002/api/users/getUserprofile",{
+                const response = await axios.get("/api/users/getUserprofile",{
                     withCredentials: true,
-                    headers:{ 
-                        Authorization: `Bearer ${token}` 
-                    },
                 });
                 setAllUsers(response.data);
                 setLoading(false);
             }
             catch (error) {
                 console.error("Error fetching users:" + error);
+                if (error?.response?.status === 401) {
+                    localStorage.removeItem("userInfo");
+                    setAuthUser(undefined);
+                    navigate('/login');
+                }
                 setLoading(false);
             }
         };
         fetchUsers();
-    }, []);
+    }, [navigate, setAuthUser]);
     return[allUsers, loading];
 }
 

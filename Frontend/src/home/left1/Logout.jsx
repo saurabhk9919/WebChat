@@ -1,24 +1,28 @@
 import axios from 'axios';
-import React from 'react'
+import { useState } from 'react'
 import { BiLogOut } from 'react-icons/bi'
-import { useState } from 'react';
-import Cookies from 'js-cookie';
-
+import { useAuth } from '../../context/AuthProvider.jsx';
+import toast from 'react-hot-toast';
 
 export default function Logout() {
-const [loading, setLoading] = React.useState(false);
+const [loading, setLoading] = useState(false);
+const { setAuthUser } = useAuth();
 
   const handleLogout=async ()=>{
 setLoading(true);
 try{
- const response = await axios.post("http://localhost:5002/api/users/logout");
+ await axios.post("/api/users/logout", {}, {
+    withCredentials: true
+  });
 localStorage.removeItem("userInfo");
-alert("Logout successful");
-Cookies.remove("jwt");
-setLoading(false);
+setAuthUser(undefined);
+toast.success("Logout successful");
 }
   catch(err){
-    console.log("Error in logout", err);
+    toast.error("Error in logout");
+  }
+  finally {
+    setLoading(false);
   }
   }
   return (
@@ -27,7 +31,7 @@ setLoading(false);
           <form action="">
             <div className='flex space-x-3'>
             
-            <button><BiLogOut onClick={handleLogout} className='text-5xl p-2 hover:bg-gray-600 rounded-lg'/></button>
+            <button type='button' onClick={handleLogout} disabled={loading}><BiLogOut className='text-5xl p-2 hover:bg-gray-600 rounded-lg'/></button>
             </div>
           </form>
         </div>
