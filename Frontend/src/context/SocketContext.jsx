@@ -33,6 +33,7 @@ export const SocketProvider = ({ children }) => {
             {
                 query: { userId },
                 withCredentials: true,
+                transports: ["websocket", "polling"],
             }
         );
 
