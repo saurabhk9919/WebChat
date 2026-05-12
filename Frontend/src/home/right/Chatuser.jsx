@@ -6,9 +6,11 @@ function Chatuser() {
   const { selectedConversation } = useConversation()
   console.log("Selected Conversation:", selectedConversation);
   const { onlineUsers } = useSocketContext();
-  const isOnline = selectedConversation ? onlineUsers.includes(selectedConversation._id) : false;
+  const selectedUserId = selectedConversation?._id?.toString?.() || selectedConversation?._id || "";
+  const isOnline = selectedUserId ? onlineUsers.map((userId) => userId?.toString?.() || userId).includes(selectedUserId) : false;
   const getOnlineUserStatus = (userId) => {
-    return onlineUsers.includes(userId)? "Online" : "Offline"; //socket io mei id hai toh onlinr otjerwsie offline
+    const normalizedUserId = userId?.toString?.() || userId;
+    return onlineUsers.map((id) => id?.toString?.() || id).includes(normalizedUserId) ? "Online" : "Offline"; //socket io mei id hai toh onlinr otjerwsie offline
   }
 
   if (!selectedConversation) {

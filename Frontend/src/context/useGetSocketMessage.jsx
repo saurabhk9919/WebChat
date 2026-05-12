@@ -1,13 +1,20 @@
 import { useSocketContext } from './SocketContext.jsx';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import useConversation from '../statemanage/useConversation.js';
+import { useAuth } from './AuthProvider.jsx';
 import sound from '../assets/notification.mp3';
 
 function useGetSocketMessage() {
     const { socket } = useSocketContext();
-    const { messages, setMessages } = useConversation();
+    const { setMessages } = useConversation();
+    const { authUser } = useAuth();
+    const audioRef = useRef(null);
 
     useEffect(() => {
+        audioRef.current = new Audio(sound);
+        audioRef.current.preload = 'auto';
+        audioRef.current.load();
+
         if (!socket) {
             console.log('Socket not available yet');
             return;
@@ -30,8 +37,13 @@ function useGetSocketMessage() {
 
                 // Play notification sound
                 try {
-                    const notification = new Audio(sound);
-                    notification.play().catch(err => console.log('Audio play failed:', err));
+                    const currentUserId = authUser?._id || authUser?.user?._id;
+                    const senderId = newMessage.senderId?.toString?.() || newMessage.senderId;
+
+                    if (audioRef.current && senderId && senderId !== currentUserId?.toString?.()) {
+                        audioRef.current.currentTime = 0;
+                        audioRef.current.play().catch(err => console.log('Audio play failed:', err));
+                    }
                 } catch (audioError) {
                     console.log('Could not play notification:', audioError);
                 }
@@ -52,6 +64,10 @@ function useGetSocketMessage() {
 
         return () => {
             socket.off("newMessage", handleNewMessage);
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current = null;
+            }
         };
     }, [socket, setMessages]);
 }
