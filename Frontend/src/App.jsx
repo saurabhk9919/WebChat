@@ -1,5 +1,5 @@
 import React from 'react'
-import Left from './home/left/left.jsx'
+import Left from './home/left/Left.jsx'
 import Right from './home/right/Right.jsx'
 import Signup from './component/Signup.jsx'
 import Login from './component/Login.jsx'
