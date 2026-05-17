@@ -16,10 +16,23 @@ app.use(cors({
   credentials: true,
 }));
 
+app.get("/", (_req, res) => {
+  res.status(200).send("WebChat API is running");
+});
+
+app.get("/health", (_req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
 const PORT = process.env.PORT || 5001;
-const URI=process.env.MONGO_URI;
+const URI = process.env.MONGO_URI || process.env.MONGODB_URI;
 
 const start = async () => {
+  if (!URI) {
+    console.warn("No MongoDB URI configured. Set MONGO_URI to a hosted MongoDB connection string before deploying.");
+    return;
+  }
+
   try{
     await mongoose.connect(URI);
     console.log("MongoDB connected successfully");
