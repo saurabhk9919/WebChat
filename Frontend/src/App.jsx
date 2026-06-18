@@ -5,23 +5,22 @@ import Signup from './component/Signup.jsx'
 import Login from './component/Login.jsx'
 import { useAuth } from './context/AuthProvider.jsx';
 import { Navigate, Route, Routes} from 'react-router-dom';
-import toast, { Toaster } from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
 
 const App = () => {
   const {authUser} = useAuth();
-  console.log("Auth User in App.jsx:", authUser);
-  
+
   return (
-    
     <>
-    {/* <Loading></Loading> */}
     <Routes>
       <Route path="/" 
       element={
         authUser ? (
-        <div className='flex w-full h-screen'>
-          <Left></Left>
-          <Right></Right>
+        <div className='min-h-screen p-3 sm:p-4 lg:p-6'>
+          <div className='mx-auto flex min-h-[calc(100vh-1.5rem)] w-full max-w-7xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 shadow-2xl shadow-black/30 backdrop-blur-xl sm:min-h-[calc(100vh-2rem)] lg:min-h-[calc(100vh-3rem)]'>
+            <Left></Left>
+            <Right></Right>
+          </div>
         </div>
         ): (
         <Navigate to="/login"/>

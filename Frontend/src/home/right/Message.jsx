@@ -18,16 +18,17 @@ function Message({ message }) {
     
     const createdAt = message.createdAt ? new Date(message.createdAt) : new Date();
     const formattedTime = createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); 
+    const bubbleClass = itsme
+      ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-br-md'
+      : 'bg-slate-800 text-slate-100 rounded-bl-md border border-white/10';
     
     return (
-      <div className='space-y-2'>
-        <div className={`chat ${chatName}`}>
-          <div className={`chat-bubble text-white ${chatColor}`}>
-            {message.message || 'Message'}
+      <div className={`chat ${chatName} max-w-[85%]`}>
+        <div className={`chat-bubble whitespace-pre-wrap break-words px-4 py-3 ${bubbleClass}`}>
+          <span className='block'>{message.message || 'Message'}</span>
           </div>
-          <div className='text-xs text-slate-400'>{formattedTime}</div>
+        <div className='mt-1 text-xs text-slate-500'>{formattedTime}</div>
         </div>
-      </div>
     )
   } catch (error) {
     console.error('Error rendering message:', error);

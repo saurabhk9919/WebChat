@@ -39,7 +39,7 @@ function Type() {
 
   return (
     <>
-   <div className='flex items-center gap-3 p-4 bg-slate-900 border-t border-slate-700'>
+   <div className='flex items-center gap-3 border-t border-white/10 bg-slate-950/80 px-5 py-4 backdrop-blur'>
     
     <div className='flex-1'>
         <input 
@@ -49,13 +49,13 @@ function Type() {
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && !loading && handleSendMessage(e)}
           disabled={loading}
-          className="w-full px-4 py-3 bg-slate-800 text-white rounded-lg border border-slate-600 focus:border-blue-500 focus:outline-none transition duration-200 placeholder-slate-400 disabled:opacity-50"
+          className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white transition duration-200 placeholder-slate-500 focus:border-blue-500 focus:outline-none disabled:opacity-50"
         />
     </div>
     <button 
       onClick={handleSendMessage}
       disabled={loading || !message.trim()}
-      className='p-3 text-2xl text-blue-500 hover:bg-blue-600 hover:text-white rounded-lg transition duration-200 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed'>
+      className='rounded-2xl border border-blue-500/20 p-3 text-2xl text-blue-400 transition duration-200 hover:bg-blue-600 hover:text-white hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50'>
         <IoSend/>
     </button>
    </div>

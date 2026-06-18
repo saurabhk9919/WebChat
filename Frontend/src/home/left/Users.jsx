@@ -7,11 +7,11 @@ const Users = () => {
   console.log("All users in Users.jsx:", allUsers);
 
   if (loading) {
-    return <div className='p-4 text-slate-300'>Loading users...</div>;
+    return <div className='flex-1 px-5 py-4 text-slate-300'>Loading users...</div>;
   }
 
   return (
-    <div className='flex-1 overflow-y-auto px-4 pb-4 space-y-3 flex-scrollbar'>
+    <div className='flex-1 space-y-2 overflow-y-auto px-3 py-3'>
       {allUsers.map((user, index) => (
         <User key={user._id || index} user={user} />
       ))}

@@ -15,7 +15,7 @@ function Chatuser() {
 
   if (!selectedConversation) {
     return (
-      <div className='w-full h-[10vh] flex items-center justify-center bg-slate-900 px-5 py-4 rounded-lg'>
+      <div className='flex h-16 items-center justify-center rounded-2xl border border-white/10 bg-slate-950/60 px-5 py-4'>
         <span className='text-slate-400'>Select a user to start chatting</span>
       </div>
     )
@@ -23,17 +23,17 @@ function Chatuser() {
 
   return (
     <>
-    <div className='w-full h-[10vh] flex items-center gap-4 bg-slate-900 px-5 py-4 rounded-lg hover:bg-slate-700 duration-300 cursor-pointer'>
+    <div className='flex h-16 items-center gap-4 rounded-2xl bg-transparent px-0 py-0 duration-300 cursor-pointer'>
 
         <div>
              <div className={`avatar ${isOnline ? 'avatar-online' : ''}`}>
-  <div className="w-16 rounded-full">
+  <div className="w-12 rounded-full ring-2 ring-white/10">
     <img src={selectedConversation.profilePic || "https://img.daisyui.com/images/profile/demo/gordon@192.webp"} />
   </div>
 </div>
         </div>
         <div className='flex flex-col justify-center'>
-            <h1 className='font-bold text-lg leading-tight'>{selectedConversation.fullname || selectedConversation.name}</h1>
+            <h1 className='font-semibold text-lg leading-tight'>{selectedConversation.fullname || selectedConversation.name}</h1>
             <span className='text-sm text-slate-300'>{getOnlineUserStatus(selectedConversation._id)}</span>
         </div>
     </div>

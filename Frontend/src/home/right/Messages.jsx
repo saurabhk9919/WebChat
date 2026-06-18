@@ -23,7 +23,7 @@ function Messages() {
 
   if (loading) {
     return (
-      <div className='flex-1 overflow-y-auto p-4 space-y-2'>
+      <div className='flex-1 min-h-0 overflow-y-auto px-5 py-4'>
         <Loading />
       </div>
     );
@@ -32,19 +32,21 @@ function Messages() {
   const messageArray = Array.isArray(messages) ? messages : [];
 
   return (
-    <div className='flex-1 overflow-y-auto p-4 space-y-2' style={{scrollBehavior: "smooth"}}>
+    <div className='flex-1 min-h-0 overflow-y-auto px-5 py-4' style={{scrollBehavior: "smooth"}}>
       {messageArray.length > 0 ? (
-        messageArray.map((message, index) => {
+        <div className='space-y-3'>
+        {messageArray.map((message, index) => {
           const isLast = index === messageArray.length - 1;
           return (
-            <div key={message?._id || index} ref={isLast ? lastMessageRef : null}>
+            <div key={message?._id || index} ref={isLast ? lastMessageRef : null} className='flex'>
               {message && <Message message={message} />}
             </div>
           );
-        })
+        })}
+        </div>
       ) : (
-        <div className='flex justify-center items-center h-full font-semibold text-gray-500'>
-          Say hi to your new friend! Start the conversation now.
+        <div className='flex h-full items-center justify-center rounded-3xl border border-dashed border-white/10 bg-white/5 p-10 text-center font-medium text-slate-400'>
+          Say hi to your new friend. Start the conversation now.
         </div>
       )}
     </div>

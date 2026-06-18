@@ -44,9 +44,10 @@ const onSubmit = (data) => {
 
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-slate-900">
-      <div className="w-full max-w-md bg-slate-800 rounded-lg shadow-lg p-8 border border-slate-700">
-        <h2 className="text-3xl font-bold text-center mb-8 text-slate-100">Login</h2>
+    <div className="flex min-h-screen items-center justify-center px-4 py-10">
+      <div className="w-full max-w-md rounded-[2rem] border border-white/10 bg-slate-950/75 p-8 shadow-2xl shadow-black/30 backdrop-blur-xl sm:p-10">
+        <h2 className="mb-3 text-center text-3xl font-bold text-slate-100">Login</h2>
+        <p className="mb-8 text-center text-sm text-slate-400">Welcome back. Continue your conversations.</p>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="mb-5">
             <label className="block text-sm font-medium text-slate-300 mb-2">
@@ -56,7 +57,7 @@ const onSubmit = (data) => {
               type="email"
               placeholder="Enter your email"
               {...register('email', { required: true })}
-              className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-slate-100 placeholder-slate-500 focus:border-blue-500 focus:outline-none"
             />
             {errors.email && <span className="text-red-400 text-sm">This field is required</span>}
           </div>
@@ -69,20 +70,20 @@ const onSubmit = (data) => {
               type="password" 
               placeholder="Enter your password"
               {...register('password', { required: true })}
-              className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-slate-100 placeholder-slate-500 focus:border-blue-500 focus:outline-none"
             />
             {errors.password && <span className="text-red-400 text-sm">This field is required</span>}
           </div> 
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200"
+            className="w-full rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3 font-bold text-white transition duration-200 hover:brightness-110"
           >
             Login
           </button>
         </form>
 
-        <p className="text-center text-slate-400 mt-4">
+        <p className="mt-4 text-center text-slate-400">
           Don't have an account? <Link to="/signup" className="text-blue-400 hover:text-blue-300 underline">Sign Up</Link>
         </p>
       </div>
