@@ -4,6 +4,7 @@ import Messages from './Messages.jsx'
 import Type from './Type.jsx'
 import useConversation from '../../statemanage/useConversation.js'
 import Loading from '../../component/Loading.jsx'
+import AISummaryCard from '../../component/AISummaryCard.jsx'
 import { useAuth } from '../../context/AuthProvider.jsx'
 import axios from 'axios'
 import toast from 'react-hot-toast'
@@ -17,6 +18,8 @@ export default function Right() {
   const [isSummarizeOpen, setIsSummarizeOpen] = useState(false)
   const [limit, setLimit] = useState('last-5')
   const [summaryType, setSummaryType] = useState('brief')
+  const [summaryData, setSummaryData] = useState(null)
+  const [isGenerating, setIsGenerating] = useState(false)
   const summarizeButtonRef = useRef(null)
   const summarizePopoverRef = useRef(null)
 
@@ -37,8 +40,65 @@ export default function Right() {
     { label: 'Action Items', value: 'action-items' },
   ]
 
-  const handleGenerate = () => {
-    console.log({ limit, summaryType })
+  const currentLimitLabel = limitOptions.find((item) => item.value === limit)?.label || 'Last 5 Messages'
+  const currentSummaryTypeLabel = summaryTypeOptions.find((item) => item.value === summaryType)?.label || 'Brief'
+
+  const formatGeneratedAt = (dateValue) => {
+    if (!dateValue) {
+      return 'Generated just now'
+    }
+
+    const generatedDate = new Date(dateValue)
+    if (Number.isNaN(generatedDate.getTime())) {
+      return 'Generated just now'
+    }
+
+    const diffMs = Date.now() - generatedDate.getTime()
+    const diffSeconds = Math.max(1, Math.floor(diffMs / 1000))
+    if (diffSeconds < 60) return 'Generated just now'
+
+    const diffMinutes = Math.floor(diffSeconds / 60)
+    if (diffMinutes < 60) return `${diffMinutes} minute${diffMinutes === 1 ? '' : 's'} ago`
+
+    const diffHours = Math.floor(diffMinutes / 60)
+    if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`
+
+    const diffDays = Math.floor(diffHours / 24)
+    return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`
+  }
+
+  const handleGenerate = async () => {
+    if (!selectedConversation?._id || isGenerating) {
+      return
+    }
+
+    setIsGenerating(true)
+    try {
+      const response = await axios.post(
+        `/api/messages/summary/${selectedConversation._id}`,
+        {
+          limit,
+          summaryType,
+        },
+        {
+          withCredentials: true,
+        }
+      )
+
+      setSummaryData({
+        ...(response.data || {}),
+        limit,
+        summaryType,
+        generatedAt: new Date().toISOString(),
+      })
+      setIsSummarizeOpen(false)
+    } catch (error) {
+      console.error('Error generating summary:', error)
+      const errorMessage = error?.response?.data?.message || error?.message || 'Failed to generate summary'
+      toast.error(errorMessage)
+    } finally {
+      setIsGenerating(false)
+    }
   }
 
   const handleLogout = async () => {
@@ -58,6 +118,38 @@ export default function Right() {
   useEffect(() => {
     return () => setSelectedConversation(null)
   }, [setSelectedConversation])
+
+  useEffect(() => {
+    setSummaryData(null)
+    setIsSummarizeOpen(false)
+    setIsGenerating(false)
+  }, [selectedConversation?._id])
+
+  const handleCopySummary = async () => {
+    const parts = []
+
+    if (summaryData?.summary) {
+      parts.push(summaryData.summary)
+    }
+
+    if (Array.isArray(summaryData?.keyPoints) && summaryData.keyPoints.length > 0) {
+      parts.push('Key Points:', ...summaryData.keyPoints.map((item) => `- ${item}`))
+    }
+
+    if (Array.isArray(summaryData?.actionItems) && summaryData.actionItems.length > 0) {
+      parts.push('Action Items:', ...summaryData.actionItems.map((item) => `- ${item}`))
+    }
+
+    if (Array.isArray(summaryData?.decisions) && summaryData.decisions.length > 0) {
+      parts.push('Decisions:', ...summaryData.decisions.map((item) => `- ${item}`))
+    }
+
+    const text = parts.join('\n\n').trim()
+    if (!text) return
+
+    await navigator.clipboard.writeText(text)
+    toast.success('Summary copied')
+  }
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
@@ -181,9 +273,10 @@ export default function Right() {
                         <button
                           type='button'
                           onClick={handleGenerate}
-                          className='rounded-xl border border-blue-500/20 bg-blue-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-400'
+                          disabled={isGenerating}
+                          className='rounded-xl border border-blue-500/20 bg-blue-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-400 disabled:cursor-not-allowed disabled:opacity-70'
                         >
-                          Generate
+                          {isGenerating ? 'AI is reading...' : 'Generate'}
                         </button>
                       </div>
                     </div>
@@ -201,6 +294,33 @@ export default function Right() {
             </button>
           </div>
           <div className='flex min-h-0 flex-1 flex-col bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.08),_transparent_35%)]'>
+            {summaryData && (
+              <div className='border-b border-white/10 px-5 pt-4'>
+                <AISummaryCard
+                  summary={summaryData.summary}
+                  keyPoints={summaryData.keyPoints}
+                  actionItems={summaryData.actionItems}
+                  decisions={summaryData.decisions}
+                  limitLabel={limitOptions.find((item) => item.value === summaryData.limit)?.label || currentLimitLabel}
+                  summaryTypeLabel={summaryTypeOptions.find((item) => item.value === summaryData.summaryType)?.label || currentSummaryTypeLabel}
+                  generatedAtLabel={formatGeneratedAt(summaryData.generatedAt)}
+                  onCopy={handleCopySummary}
+                  onRegenerate={handleGenerate}
+                  isLoading={isGenerating}
+                />
+              </div>
+            )}
+            {isGenerating && !summaryData && (
+              <div className='border-b border-white/10 px-5 pt-4'>
+                <AISummaryCard
+                  isLoading
+                  limitLabel={currentLimitLabel}
+                  summaryTypeLabel={currentSummaryTypeLabel}
+                  generatedAtLabel='Generated just now'
+                  onRegenerate={handleGenerate}
+                />
+              </div>
+            )}
             <Messages></Messages>
             <Type></Type>
           </div>

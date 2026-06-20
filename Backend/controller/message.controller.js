@@ -1,6 +1,7 @@
 import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
 import { io, getRecieverSocketId } from "../SocketIO/server.js";
+import { buildConversationSummary } from "../services/groqService.js";
 
 export const sendMessage = async (req, res) => {
    // console.log("Send message controller",req.params.id, req.body.message);
@@ -69,4 +70,54 @@ export const getMessages = async (req, res) => {
             res.status(500).json({ message: "Internal server error" });
     }
 
+}
+
+export const getConversationSummary = async (req, res) => {
+    try {
+        const { conversationId } = req.params;
+        const { limit, summaryType } = req.body || {};
+        const senderId = req.user._id;
+
+        if (!conversationId) {
+            return res.status(400).json({ message: "conversationId is required" });
+        }
+
+        console.log('Summary request:', { conversationId, senderId, limit, summaryType });
+
+        const conversation = await Conversation.findOne({
+            _id: conversationId,
+        }).populate('messages') || await Conversation.findOne({
+            participants: { $all: [senderId, conversationId] },
+        }).populate('messages');
+
+        console.log('Conversation found:', !!conversation);
+        if (!conversation) {
+            const count = await Conversation.countDocuments({ participants: senderId });
+            console.log('Sender has conversations:', count);
+        }
+
+        if (!conversation) {
+            return res.status(404).json({ message: "Conversation not found" });
+        }
+
+        const messages = Array.isArray(conversation.messages) ? conversation.messages : [];
+        console.log('Messages count:', messages.length);
+
+        const summary = await buildConversationSummary({
+            messages,
+            limit,
+            summaryType,
+        });
+
+        return res.status(200).json({
+            summary: summary.summary,
+            keyPoints: summary.keyPoints,
+            actionItems: summary.actionItems,
+            decisions: summary.decisions,
+        });
+    } catch (error) {
+        console.log("Message summary error" + error);
+        const statusCode = error?.statusCode || 500;
+        return res.status(statusCode).json({ message: error?.message || "Internal server error" });
+    }
 }
