@@ -26,15 +26,32 @@ function useSendMessage() {
             }
 
             const createdMessage = response.data?.newMessage;
-            if (createdMessage) {
-                setMessages((prev) => {
-                    if (!Array.isArray(prev)) {
-                        return [createdMessage];
-                    }
-                    return [...prev, createdMessage];
-                });
-                return createdMessage;
-            }
+const detectedAction = response.data?.detectedAction;
+
+if (createdMessage) {
+
+    const messageWithAction = {
+
+        ...createdMessage,
+
+        detectedAction
+
+    };
+
+    setMessages((prev)=>{
+
+        if(!Array.isArray(prev)){
+
+            return [messageWithAction];
+
+        }
+
+        return [...prev,messageWithAction];
+
+    });
+
+    return messageWithAction;
+}
 
             return null;
         }

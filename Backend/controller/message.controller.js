@@ -2,6 +2,7 @@ import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
 import { io, getRecieverSocketId } from "../SocketIO/server.js";
 import { buildConversationSummary } from "../services/groqService.js";
+import { extractActionFromMessage } from "../services/actionExtractionService.js";
 
 export const sendMessage = async (req, res) => {
    // console.log("Send message controller",req.params.id, req.body.message);
@@ -31,6 +32,13 @@ export const sendMessage = async (req, res) => {
         }
         //save both
         await Promise.all([  newMessage.save(), conversation.save() ]);//save both message and conversation on database
+        let detectedAction = null;
+        try {
+            detectedAction = await extractActionFromMessage(message);
+            console.log("Detected Action:", detectedAction);
+        } catch (error) {
+            console.log("Action Detection Error:", error.message);
+        }
         const recieverSocketId = getRecieverSocketId(recieverId);
         if(recieverSocketId){
             io.to(recieverSocketId).emit("newMessage", {
@@ -39,12 +47,13 @@ export const sendMessage = async (req, res) => {
                 recieverId: newMessage.recieverId,
                 message: newMessage.message,
                 createdAt: newMessage.createdAt,
-                updatedAt: newMessage.updatedAt
+                updatedAt: newMessage.updatedAt,
+                detectedAction
             });
         }
 
 
-        return res.status(201).json({ message: "Message sent successfully", newMessage });
+        return res.status(201).json({ message: "Message sent successfully", newMessage, detectedAction });
     }
     catch(err){
         console.log("Error in sending message", err);
@@ -121,3 +130,28 @@ export const getConversationSummary = async (req, res) => {
         return res.status(statusCode).json({ message: error?.message || "Internal server error" });
     }
 }
+
+export const detectAction = async (req, res) => {
+    try {
+
+        const { message } = req.body;
+
+        if (!message) {
+            return res.status(400).json({
+                message: "Message is required"
+            });
+        }
+
+        const action = await extractActionFromMessage(message);
+
+        return res.status(200).json(action);
+
+    } catch (error) {
+
+        console.log(error);
+
+        return res.status(error.statusCode || 500).json({
+            message: error.message || "Internal server error"
+        });
+    }
+};

@@ -1,4 +1,5 @@
 import React from 'react'
+import ActionCard from "../../component/ActionCard";
 
 function Message({ message }) {
   if (!message) {
@@ -22,14 +23,26 @@ function Message({ message }) {
       ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-br-md'
       : 'bg-slate-800 text-slate-100 rounded-bl-md border border-white/10';
     
-    return (
-      <div className={`chat ${chatName} max-w-[85%]`}>
-        <div className={`chat-bubble whitespace-pre-wrap break-words px-4 py-3 ${bubbleClass}`}>
-          <span className='block'>{message.message || 'Message'}</span>
-          </div>
-        <div className='mt-1 text-xs text-slate-500'>{formattedTime}</div>
-        </div>
-    )
+   return (
+  <div className={`chat ${chatName} max-w-[85%]`}>
+    <div
+      className={`chat-bubble whitespace-pre-wrap break-words px-4 py-3 ${bubbleClass}`}
+    >
+      <span className="block">
+        {message.message || "Message"}
+      </span>
+    </div>
+
+    <div className="mt-1 text-xs text-slate-500">
+      {formattedTime}
+    </div>
+
+    {message.detectedAction &&
+      message.detectedAction.intent !== "NONE" && (
+        <ActionCard action={message.detectedAction} />
+      )}
+  </div>
+);
   } catch (error) {
     console.error('Error rendering message:', error);
     return null;
