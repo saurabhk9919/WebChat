@@ -28,6 +28,10 @@ const messageSchema = new mongoose.Schema({
             },
         ],   
         },
+        detectedAction: {
+            type: Object,
+            default: null
+        },
 }, {
      timestamps: true, 
 });

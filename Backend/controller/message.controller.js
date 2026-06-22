@@ -22,16 +22,6 @@ export const sendMessage = async (req, res) => {
             }); 
         }
         
-        const newMessage = new Message({
-             senderId,
-             recieverId,
-        message,
-        });
-        if(newMessage){
-            conversation.messages.push(newMessage._id);
-        }
-        //save both
-        await Promise.all([  newMessage.save(), conversation.save() ]);//save both message and conversation on database
         let detectedAction = null;
         try {
             detectedAction = await extractActionFromMessage(message);
@@ -39,6 +29,19 @@ export const sendMessage = async (req, res) => {
         } catch (error) {
             console.log("Action Detection Error:", error.message);
         }
+
+        const newMessage = new Message({
+             senderId,
+             recieverId,
+             message,
+             detectedAction
+        });
+        if(newMessage){
+            conversation.messages.push(newMessage._id);
+        }
+        //save both
+        await Promise.all([  newMessage.save(), conversation.save() ]);//save both message and conversation on database
+
         const recieverSocketId = getRecieverSocketId(recieverId);
         if(recieverSocketId){
             io.to(recieverSocketId).emit("newMessage", {

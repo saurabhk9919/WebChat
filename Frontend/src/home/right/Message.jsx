@@ -24,25 +24,27 @@ function Message({ message }) {
       : 'bg-slate-800 text-slate-100 rounded-bl-md border border-white/10';
     
    return (
-  <div className={`chat ${chatName} max-w-[85%]`}>
-    <div
-      className={`chat-bubble whitespace-pre-wrap break-words px-4 py-3 ${bubbleClass}`}
-    >
-      <span className="block">
-        {message.message || "Message"}
-      </span>
-    </div>
+    <>
+      <div className={`chat ${chatName} max-w-[85%]`}>
+        <div
+          className={`chat-bubble whitespace-pre-wrap break-words px-4 py-3 ${bubbleClass}`}
+        >
+          <span className="block">
+            {message.message || "Message"}
+          </span>
+        </div>
 
-    <div className="mt-1 text-xs text-slate-500">
-      {formattedTime}
-    </div>
+        <div className="mt-1 text-xs text-slate-500">
+          {formattedTime}
+        </div>
+      </div>
 
-    {message.detectedAction &&
-      message.detectedAction.intent !== "NONE" && (
-        <ActionCard action={message.detectedAction} />
-      )}
-  </div>
-);
+      {message.detectedAction &&
+        message.detectedAction.intent !== "NONE" && (
+          <ActionCard action={message.detectedAction} />
+        )}
+    </>
+  );
   } catch (error) {
     console.error('Error rendering message:', error);
     return null;
