@@ -38,8 +38,13 @@ function Messages() {
         {messageArray.map((message, index) => {
           const isLast = index === messageArray.length - 1;
           return (
-            <div key={message?._id || index} ref={isLast ? lastMessageRef : null} className='flex'>
-              {message && <Message message={message} />}
+            <div
+              key={message?._id || index}
+              id={`message-${message?._id}`}
+              ref={isLast ? lastMessageRef : null}
+              className="flex flex-col transition-all duration-300 rounded-xl"
+            >
+              {message && <Message message={message} messageIndex={index + 1} />}
             </div>
           );
         })}

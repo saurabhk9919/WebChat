@@ -158,3 +158,21 @@ export const detectAction = async (req, res) => {
         });
     }
 };
+
+export const dismissAction = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const msg = await Message.findById(id);
+        if (!msg) {
+            return res.status(404).json({ message: "Message not found" });
+        }
+        if (msg.detectedAction) {
+            msg.detectedAction = { ...msg.detectedAction, intent: "NONE" };
+            await msg.save();
+        }
+        return res.status(200).json({ message: "Action dismissed successfully", msg });
+    } catch (error) {
+        console.error("Error in dismissAction:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};

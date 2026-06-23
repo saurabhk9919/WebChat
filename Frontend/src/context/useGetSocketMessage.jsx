@@ -6,7 +6,7 @@ import sound from '../assets/notification.mp3';
 
 function useGetSocketMessage() {
     const { socket } = useSocketContext();
-    const { setMessages } = useConversation();
+    const { setMessages, setTasks } = useConversation();
     const { authUser } = useAuth();
     const audioRef = useRef(null);
 
@@ -60,16 +60,77 @@ function useGetSocketMessage() {
             }
         };
 
+        const handleTaskCreated = (newTask) => {
+            try {
+                if (!newTask) return;
+                setTasks((prevTasks) => {
+                    const tasksList = Array.isArray(prevTasks) ? prevTasks : [];
+                    if (tasksList.some((t) => t._id === newTask._id)) return tasksList;
+                    return [newTask, ...tasksList];
+                });
+                setMessages((prevMessages) => {
+                    const messagesList = Array.isArray(prevMessages) ? prevMessages : [];
+                    return messagesList.map((msg) => {
+                        if (msg._id === newTask.sourceMessageId) {
+                            return { ...msg, linkedTaskId: newTask._id };
+                        }
+                        return msg;
+                    });
+                });
+            } catch (err) {
+                console.error("Error handling socket taskCreated:", err);
+            }
+        };
+
+        const handleTaskUpdated = (updatedTask) => {
+            try {
+                if (!updatedTask) return;
+                setTasks((prevTasks) => {
+                    const tasksList = Array.isArray(prevTasks) ? prevTasks : [];
+                    return tasksList.map((t) => (t._id === updatedTask._id ? updatedTask : t));
+                });
+            } catch (err) {
+                console.error("Error handling socket taskUpdated:", err);
+            }
+        };
+
+        const handleTaskDeleted = ({ taskId, sourceMessageId }) => {
+            try {
+                if (!taskId) return;
+                setTasks((prevTasks) => {
+                    const tasksList = Array.isArray(prevTasks) ? prevTasks : [];
+                    return tasksList.filter((t) => t._id !== taskId);
+                });
+                setMessages((prevMessages) => {
+                    const messagesList = Array.isArray(prevMessages) ? prevMessages : [];
+                    return messagesList.map((msg) => {
+                        if (msg._id === sourceMessageId) {
+                            return { ...msg, linkedTaskId: null };
+                        }
+                        return msg;
+                    });
+                });
+            } catch (err) {
+                console.error("Error handling socket taskDeleted:", err);
+            }
+        };
+
         socket.on("newMessage", handleNewMessage);
+        socket.on("taskCreated", handleTaskCreated);
+        socket.on("taskUpdated", handleTaskUpdated);
+        socket.on("taskDeleted", handleTaskDeleted);
 
         return () => {
             socket.off("newMessage", handleNewMessage);
+            socket.off("taskCreated", handleTaskCreated);
+            socket.off("taskUpdated", handleTaskUpdated);
+            socket.off("taskDeleted", handleTaskDeleted);
             if (audioRef.current) {
                 audioRef.current.pause();
                 audioRef.current = null;
             }
         };
-    }, [socket, setMessages]);
+    }, [socket, setMessages, setTasks, authUser]);
 }
 
 export default useGetSocketMessage

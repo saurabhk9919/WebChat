@@ -5,6 +5,7 @@ import userRoute from './route/user.route.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';//is a type of middleware that can be used to enable CORS with various options.
 import messaRoute from './route/message.route.js';
+import taskRoute from './route/task.route.js';
 import {app,server} from './SocketIO/server.js';
 
 dotenv.config();
@@ -46,6 +47,7 @@ start();
 
 app.use("/api/users", userRoute);
 app.use("/api/messages", messaRoute);
+app.use("/api/tasks", taskRoute);
 
 
 server.listen(PORT, () => {

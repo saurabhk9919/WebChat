@@ -8,5 +8,11 @@ const useConversation = create((set) => ({
   setMessages: (messagesOrUpdater) => set((state) => ({
     messages: typeof messagesOrUpdater === 'function' ? messagesOrUpdater(state.messages) : messagesOrUpdater,
   })),
+  tasks: [],
+  setTasks: (tasksOrUpdater) => set((state) => ({
+    tasks: typeof tasksOrUpdater === 'function' ? tasksOrUpdater(state.tasks) : tasksOrUpdater,
+  })),
+  taskFilter: "all",
+  setTaskFilter: (taskFilter) => set({ taskFilter }),
 }))
 export default useConversation;

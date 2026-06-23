@@ -32,6 +32,11 @@ const messageSchema = new mongoose.Schema({
             type: Object,
             default: null
         },
+        linkedTaskId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Task",
+            default: null
+        },
 }, {
      timestamps: true, 
 });

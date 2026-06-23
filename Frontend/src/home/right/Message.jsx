@@ -1,7 +1,8 @@
 import React from 'react'
 import ActionCard from "../../component/ActionCard";
+import TaskCard from "../../component/TaskCard";
 
-function Message({ message }) {
+function Message({ message, messageIndex }) {
   if (!message) {
     return null;
   }
@@ -39,10 +40,18 @@ function Message({ message }) {
         </div>
       </div>
 
-      {message.detectedAction &&
+      {message.linkedTaskId ? (
+        <TaskCard taskId={message.linkedTaskId} messageIndex={messageIndex} />
+      ) : (
+        message.detectedAction &&
         message.detectedAction.intent !== "NONE" && (
-          <ActionCard action={message.detectedAction} />
-        )}
+          <ActionCard
+            action={message.detectedAction}
+            messageId={message._id}
+            messageIndex={messageIndex}
+          />
+        )
+      )}
     </>
   );
   } catch (error) {

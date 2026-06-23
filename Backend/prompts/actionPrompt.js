@@ -21,7 +21,8 @@ The JSON format must be:
   "description": "",
   "date": "",
   "time": "",
-  "priority": "low | medium | high"
+  "priority": "low | medium | high",
+  "assignee": ""
 }
 
 Rules:
@@ -34,7 +35,8 @@ Rules:
   "description":"",
   "date":"",
   "time":"",
-  "priority":"low"
+  "priority":"low",
+  "assignee":""
 }
 
 - Never explain anything.
@@ -44,6 +46,7 @@ Rules:
 - Description can be empty.
 - If date or time is not mentioned, leave them empty.
 - Guess priority only if obvious.
+- Guess assignee from the context (e.g., if the message says 'Riya is handling it' or 'Please ask John to do X', extract 'Riya' or 'John'). Default to 'You' if not mentioned.
 `;
 
 export default actionPrompt;
