@@ -1,21 +1,21 @@
- import mongoose from "mongoose";
+import mongoose from "mongoose";
 
 
 const messageSchema = new mongoose.Schema({
-    senderId: { 
-        type: mongoose.Schema.Types.ObjectId, 
+    senderId: {
+        type: mongoose.Schema.Types.ObjectId,
         ref: "User",
-         required: true 
-        },
+        required: true
+    },
 
-        recieverId:{
-        type: mongoose.Schema.Types.ObjectId, 
+    recieverId: {
+        type: mongoose.Schema.Types.ObjectId,
         ref: "User",
-         required: true
-        },
+        required: true
+    },
 
-        message: { 
-        type: String, 
+    message: {
+        type: String,
         required: true,
         maxlength: 1000,
         trim: true,
@@ -26,20 +26,24 @@ const messageSchema = new mongoose.Schema({
                 },
                 message: "Message cannot be empty",
             },
-        ],   
-        },
-        detectedAction: {
-            type: Object,
-            default: null
-        },
-        linkedTaskId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Task",
-            default: null
-        },
+        ],
+    },
+    detectedAction: {
+        type: Object,
+        default: null
+    },
+    linkedTaskId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Task",
+        default: null
+    },
+    embedding: {
+        type: [Number],
+        default: []
+    },
 }, {
-     timestamps: true, 
+    timestamps: true,
 });
 
 const Message = mongoose.model("Message", messageSchema);
-export default Message; 
+export default Message;

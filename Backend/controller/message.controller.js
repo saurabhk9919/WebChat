@@ -5,23 +5,23 @@ import { buildConversationSummary } from "../services/groqService.js";
 import { extractActionFromMessage } from "../services/actionExtractionService.js";
 
 export const sendMessage = async (req, res) => {
-   // console.log("Send message controller",req.params.id, req.body.message);
-    try{
-        const {message} = req.body;
-        const {id:recieverId} = req.params;
+    // console.log("Send message controller",req.params.id, req.body.message);
+    try {
+        const { message } = req.body;
+        const { id: recieverId } = req.params;
         const senderId = req.user._id;//logged in user id from auth middleware
 
         let conversation = await Conversation.findOne({
             participants: { $all: [senderId, recieverId] }
         });
         //if no conversation exists create new
-        if(!conversation){
+        if (!conversation) {
             conversation = await Conversation.create({
                 participants: [senderId, recieverId],
-            
-            }); 
+
+            });
         }
-        
+
         let detectedAction = null;
         try {
             detectedAction = await extractActionFromMessage(message);
@@ -31,19 +31,30 @@ export const sendMessage = async (req, res) => {
         }
 
         const newMessage = new Message({
-             senderId,
-             recieverId,
-             message,
-             detectedAction
+            senderId,
+            recieverId,
+            message,
+            detectedAction
         });
-        if(newMessage){
+        if (newMessage) {
             conversation.messages.push(newMessage._id);
         }
         //save both
-        await Promise.all([  newMessage.save(), conversation.save() ]);//save both message and conversation on database
+        await Promise.all([newMessage.save(), conversation.save()]);//save both message and conversation on database
+
+        //round
+        generateEmbedding(message)
+            .then(async (embedding) => {
+                newMessage.embedding = embedding;
+                await newMessage.save();
+                console.log(`Successfully saved vector embedding for message ${newMessage._id}`);
+            })
+            .catch((err) => {
+                console.error(`Failed to generate background embedding for message ${newMessage._id}:`, err.message);
+            });
 
         const recieverSocketId = getRecieverSocketId(recieverId);
-        if(recieverSocketId){
+        if (recieverSocketId) {
             io.to(recieverSocketId).emit("newMessage", {
                 _id: newMessage._id,
                 senderId: newMessage.senderId,
@@ -58,28 +69,28 @@ export const sendMessage = async (req, res) => {
 
         return res.status(201).json({ message: "Message sent successfully", newMessage, detectedAction });
     }
-    catch(err){
+    catch (err) {
         console.log("Error in sending message", err);
         res.status(500).json({ message: "Internal server error" });
     }
 };
 
 export const getMessages = async (req, res) => {
-    try{
-        const { id:chatuser } = req.params;//id of other user in chat to see other and older chats
+    try {
+        const { id: chatuser } = req.params;//id of other user in chat to see other and older chats
         const senderId = req.user._id;
         const conversation = await Conversation.findOne({
             participants: { $all: [senderId, chatuser] },
         }).populate('messages');                 //to see the written messages
-        if(!conversation){
+        if (!conversation) {
             return res.status(200).json({ message: "No conversation found" });
         }
-        const messages= conversation.messages;
+        const messages = conversation.messages;
         return res.status(200).json({ messages });//return messages array
     }
-    catch(error){
-        console.log("Message getting error"+error);
-            res.status(500).json({ message: "Internal server error" });
+    catch (error) {
+        console.log("Message getting error" + error);
+        res.status(500).json({ message: "Internal server error" });
     }
 
 }
