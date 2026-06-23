@@ -7,6 +7,7 @@ import TaskSidebar from './TaskSidebar.jsx'
 import useGetTasks from '../../context/useGetTasks.jsx'
 import Loading from '../../component/Loading.jsx'
 import AISummaryCard from '../../component/AISummaryCard.jsx'
+import SemanticSearch from '../../component/SemanticSearch.jsx'
 import { useAuth } from '../../context/AuthProvider.jsx'
 import axios from 'axios'
 import toast from 'react-hot-toast'
@@ -287,6 +288,7 @@ export default function Right() {
                     </div>
                   )}
                 </div>
+                <SemanticSearch />
               </div>
 
               <button 

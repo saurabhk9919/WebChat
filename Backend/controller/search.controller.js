@@ -56,7 +56,7 @@ export const searchSemanticGlobal = async (req, res) => {
         const messages = await Message.find({
             _id: { $in: messageIds },
             embedding: { $exists: true, $not: { $size: 0 } }
-        });
+        }).populate("senderId", "name").populate("recieverId", "name");
 
         if (messages.length === 0) {
             return res.status(200).json([]);
