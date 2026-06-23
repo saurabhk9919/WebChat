@@ -1,8 +1,8 @@
 import { create } from 'zustand'   //to   select user conversation
 
 const useConversation = create((set) => ({
-    selectedConversation: null,         //initially no conversation selected
-  setSelectedConversation: (selectedConversation) => set({selectedConversation}),
+  selectedConversation: null,         //initially no conversation selected
+  setSelectedConversation: (selectedConversation) => set({ selectedConversation }),
   messages: [],
   // Accept either an array or an updater function like React's setState
   setMessages: (messagesOrUpdater) => set((state) => ({
@@ -14,5 +14,7 @@ const useConversation = create((set) => ({
   })),
   taskFilter: "all",
   setTaskFilter: (taskFilter) => set({ taskFilter }),
+  pendingScrollMessageId: null,
+  setPendingScrollMessageId: (pendingScrollMessageId) => set({ pendingScrollMessageId }),
 }))
 export default useConversation;

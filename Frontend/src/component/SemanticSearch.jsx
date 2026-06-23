@@ -6,7 +6,7 @@ import { BiSearch } from "react-icons/bi";
 import toast from "react-hot-toast";
 
 function SemanticSearch() {
-    const { selectedConversation, setSelectedConversation } = useConversation();
+    const { navigateToMessage } = useConversation();
     const [isOpen, setIsOpen] = useState(false);
     const [query, setQuery] = useState("");
     const [results, setResults] = useState([]);
@@ -47,16 +47,11 @@ function SemanticSearch() {
             ? result.message.recieverId
             : result.message.senderId;
 
-        // If the message is in a different conversation, switch active conversation first
-        if (selectedConversation?._id !== partner._id) {
-            setSelectedConversation(partner);
-            // Wait for messages to populate before scrolling
-            setTimeout(() => {
-                scrollToAndHighlightMessage(result.message._id);
-            }, 650);
-        } else {
-            scrollToAndHighlightMessage(result.message._id);
-        }
+        navigateToMessage({
+            conversation: partner,
+            messageId: result.message._id,
+            source: "search"
+        });
     };
 
     // Close popover when clicking outside

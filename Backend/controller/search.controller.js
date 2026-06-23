@@ -5,11 +5,25 @@ import Message from "../models/message.model.js";
 
 export const searchSemanticGlobal = async (req, res) => {
     try {
-        const { query, conversationId } = req.body;
+        let { query, conversationId } = req.body;
         const currentUserId = req.user._id;
 
-        if (!query || !query.trim()) {
+        if (query === undefined || query === null) {
             return res.status(400).json({ message: "Search query is required" });
+        }
+
+        if (typeof query !== "string") {
+            return res.status(400).json({ message: "Search query must be a string" });
+        }
+
+        query = query.trim();
+
+        if (query.length === 0) {
+            return res.status(400).json({ message: "Search query cannot be empty" });
+        }
+
+        if (query.length > 200) {
+            return res.status(400).json({ message: "Search query must be 200 characters or fewer" });
         }
 
         let queryEmbedding;
@@ -56,7 +70,7 @@ export const searchSemanticGlobal = async (req, res) => {
         const messages = await Message.find({
             _id: { $in: messageIds },
             embedding: { $exists: true, $not: { $size: 0 } }
-        }).populate("senderId", "name").populate("recieverId", "name");
+        }).populate("senderId", "name email").populate("recieverId", "name email");
 
         if (messages.length === 0) {
             return res.status(200).json([]);
@@ -78,10 +92,8 @@ export const searchSemanticGlobal = async (req, res) => {
 
         const results = topMatches.map((item) => ({
             message: item.message,
-            messages: item.message,
             conversationId: msgToConvMap[item.message._id.toString()],
-            similarityScore: item.similarity,
-            similarity_score: item.similarity
+            similarityScore: item.similarity
         }));
 
         return res.status(200).json(results);

@@ -3,6 +3,7 @@ import Message from "../models/message.model.js";
 import { io, getRecieverSocketId } from "../SocketIO/server.js";
 import { buildConversationSummary } from "../services/groqService.js";
 import { extractActionFromMessage } from "../services/actionExtractionService.js";
+import { generateEmbedding } from "../services/embeddingsService.js";
 
 export const sendMessage = async (req, res) => {
     // console.log("Send message controller",req.params.id, req.body.message);

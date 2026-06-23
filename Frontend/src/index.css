@@ -45,10 +45,14 @@ body {
     background-color: rgba(59, 130, 246, 0.45) !important;
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.6) !important;
   }
+  100% {
+    background-color: transparent !important;
+    box-shadow: none !important;
+  }
 }
 
 .highlight-msg {
-  animation: messageGlow 2.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  animation: messageGlow 2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
 }
 
 @keyframes taskGlow {
@@ -56,8 +60,12 @@ body {
     background-color: rgba(16, 185, 129, 0.45) !important;
     box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.6) !important;
   }
+  100% {
+    background-color: transparent !important;
+    box-shadow: none !important;
+  }
 }
 
 .highlight-task {
-  animation: taskGlow 2.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  animation: taskGlow 2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
 }

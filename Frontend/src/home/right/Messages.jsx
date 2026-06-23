@@ -3,23 +3,41 @@ import Message from './Message.jsx'
 import useGetMessage from '../../context/useGetMessage.jsx'
 import Loading from '../../component/Loading.jsx';
 import useGetSocketMessage from '../../context/useGetSocketMessage.jsx';
+import useConversation from '../../statemanage/useConversation.js';
+import { scrollToAndHighlightMessage } from '../../utils/navigationHelper.js';
 
 function Messages() {
   const {loading, messages}=useGetMessage();
   const lastMessageRef = useRef(null);
+  const { pendingNavigation, setPendingNavigation } = useConversation();
+  const lastMessageId = messages.length > 0 ? messages[messages.length - 1]?._id : null;
+  const prevLastMessageIdRef = useRef(null);
 
   useGetSocketMessage();
   console.log("Messages in Messages.jsx:", messages);
 
   useEffect(() => {
-    try {
-      if (lastMessageRef.current && Array.isArray(messages) && messages.length > 0) {
-        lastMessageRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (pendingNavigation?.messageId) {
+      const targetId = pendingNavigation.messageId;
+      const element = document.getElementById(`message-${targetId}`);
+      if (element) {
+        scrollToAndHighlightMessage(targetId);
+        setPendingNavigation(null);
+        prevLastMessageIdRef.current = lastMessageId;
       }
-    } catch (error) {
-      console.error('Error scrolling to last message:', error);
+    } else {
+      if (lastMessageId && lastMessageId !== prevLastMessageIdRef.current) {
+        try {
+          if (lastMessageRef.current) {
+            lastMessageRef.current.scrollIntoView({ behavior: 'smooth' });
+          }
+        } catch (error) {
+          console.error('Error scrolling to last message:', error);
+        }
+        prevLastMessageIdRef.current = lastMessageId;
+      }
     }
-  }, [messages]);
+  }, [messages, pendingNavigation, setPendingNavigation, lastMessageId]);
 
   if (loading) {
     return (
