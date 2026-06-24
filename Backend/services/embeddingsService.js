@@ -1,61 +1,21 @@
-const GROQ_EMBEDDINGS_URL = "https://api.groq.com/openai/v1/embeddings";
-const EMBEDDINGS_MODEL = "nomic-embed-text-v1.5";
+import { pipeline } from "@xenova/transformers";
+
+let extractor = null;
 
 /**
- * Deterministic local string hashing helper.
- * @param {string} str - String to hash.
- * @returns {number} - Positive hash value.
+ * Initializes and returns the feature extraction pipeline.
+ * Ensures the model is loaded only once (singleton pattern).
+ * @returns {Promise<Function>} - The pipeline extractor function.
  */
-const getHash = (str) => {
-    let hash = 5381;
-    for (let i = 0; i < str.length; i++) {
-        hash = (hash * 33) ^ str.charCodeAt(i);
+export const getExtractor = async () => {
+    if (!extractor) {
+        extractor = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
     }
-    return Math.abs(hash);
+    return extractor;
 };
 
 /**
- * Generates a 768-dimension local vector representation using the Hashing Trick.
- * Used as a zero-latency fallback when remote model API fails.
- * @param {string} text - Input text.
- * @returns {number[]} - 768-dimension float vector normalized to L2 norm of 1.0.
- */
-export const generateEmbeddingLocal = (text) => {
-    const vector = new Array(768).fill(0);
-    if (!text || typeof text !== "string") return vector;
-
-    const words = text.toLowerCase()
-        .replace(/[^\w\s]/g, "")
-        .split(/\s+/)
-        .filter(w => w.length > 0);
-
-    if (words.length === 0) return vector;
-
-    for (const word of words) {
-        for (let seed = 0; seed < 3; seed++) {
-            const h = getHash(word + seed);
-            const index = h % 768;
-            vector[index] += 1;
-        }
-    }
-
-    let sumSquares = 0;
-    for (let i = 0; i < 768; i++) {
-        sumSquares += vector[i] * vector[i];
-    }
-    const norm = Math.sqrt(sumSquares);
-    if (norm > 0) {
-        for (let i = 0; i < 768; i++) {
-            vector[i] /= norm;
-        }
-    }
-
-    return vector;
-};
-
-/**
- * Generates a 768-dimension vector embedding for the supplied text.
- * Falls back gracefully to local vector projection if the Groq API model fails.
+ * Generates a 384-dimensional vector embedding for the supplied text.
  * @param {string} text - The input text to vectorize.
  * @returns {Promise<number[]>} - Float vector embedding array.
  */
@@ -64,40 +24,17 @@ export const generateEmbedding = async (text) => {
         throw new Error("Text must be a non-empty string");
     }
 
-    // If GROQ_API key is missing, fall back directly to local hashing vectorizer
-    if (!process.env.GROQ_API) {
-        console.warn("GROQ_API key is missing. Using local vectorizer fallback.");
-        return generateEmbeddingLocal(text);
-    }
-
     try {
-        const response = await fetch(GROQ_EMBEDDINGS_URL, {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${process.env.GROQ_API}`,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                model: EMBEDDINGS_MODEL,
-                input: text.replace(/\n/g, " "),
-            }),
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text().catch(() => "");
-            throw new Error(`Groq Embeddings request failed (${response.status}): ${errorText}`);
-        }
-
-        const payload = await response.json();
-        const embedding = payload?.data?.[0]?.embedding;
+        const pipe = await getExtractor();
+        const output = await pipe(text, { pooling: "mean", normalize: true });
         
-        if (!Array.isArray(embedding)) {
-            throw new Error("Groq API returned an invalid embedding array");
+        if (!output || !output.data) {
+            throw new Error("Pipeline returned an invalid response");
         }
-
-        return embedding;
+        
+        return Array.from(output.data);
     } catch (err) {
-        console.warn(`Groq Embeddings API error: "${err.message}". Falling back to local vectorizer.`);
-        return generateEmbeddingLocal(text);
+        console.error(`Failed to generate neural embedding for text: "${text}":`, err.message);
+        throw err; // Proper error instead of silent local fallback
     }
 };
