@@ -16,5 +16,11 @@ const useConversation = create((set) => ({
   setTaskFilter: (taskFilter) => set({ taskFilter }),
   pendingScrollMessageId: null,
   setPendingScrollMessageId: (pendingScrollMessageId) => set({ pendingScrollMessageId }),
+  pendingNavigation: null,
+  setPendingNavigation: (pendingNavigation) => set({ pendingNavigation }),
+  navigateToMessage: ({ conversation, messageId }) => set({
+    selectedConversation: conversation,
+    pendingNavigation: { messageId }
+  }),
 }))
 export default useConversation;

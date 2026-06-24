@@ -69,3 +69,14 @@ body {
 .highlight-task {
   animation: taskGlow 2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
 }
+
+@keyframes yellowGlow {
+  0% {
+    background-color: rgba(234, 179, 8, 0.45) !important;
+    box-shadow: 0 0 0 2px rgba(234, 179, 8, 0.6) !important;
+  }
+}
+
+.highlight-message {
+  animation: yellowGlow 2s cubic-bezier(0.25, 1, 0.5, 1);
+}

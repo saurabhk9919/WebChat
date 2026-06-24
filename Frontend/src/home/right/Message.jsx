@@ -1,6 +1,7 @@
 import React from 'react'
 import ActionCard from "../../component/ActionCard";
 import TaskCard from "../../component/TaskCard";
+import useConversation from "../../statemanage/useConversation.js";
 
 function Message({ message, messageIndex }) {
   if (!message) {
@@ -14,6 +15,9 @@ function Message({ message, messageIndex }) {
       return null;
     }
 
+    const { pendingScrollMessageId, setPendingScrollMessageId } = useConversation();
+    const isHighlighted = message._id === pendingScrollMessageId;
+
     const itsme = message.senderId === authUser._id;
     const chatName = itsme ? "chat-end" : "chat-start";
     const chatColor = itsme ? "bg-green-500 text-white" : "chat-bubble-neutral";
@@ -24,11 +28,18 @@ function Message({ message, messageIndex }) {
       ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-br-md'
       : 'bg-slate-800 text-slate-100 rounded-bl-md border border-white/10';
     
+    const highlightClass = isHighlighted ? 'highlight-message' : '';
+    
    return (
     <>
       <div className={`chat ${chatName} max-w-[85%]`}>
         <div
-          className={`chat-bubble whitespace-pre-wrap break-words px-4 py-3 ${bubbleClass}`}
+          className={`chat-bubble whitespace-pre-wrap break-words px-4 py-3 ${bubbleClass} ${highlightClass}`}
+          onAnimationEnd={() => {
+            if (isHighlighted) {
+              setPendingScrollMessageId(null);
+            }
+          }}
         >
           <span className="block">
             {message.message || "Message"}

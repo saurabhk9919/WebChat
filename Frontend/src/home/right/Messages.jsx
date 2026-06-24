@@ -9,19 +9,22 @@ import { scrollToAndHighlightMessage } from '../../utils/navigationHelper.js';
 function Messages() {
   const {loading, messages}=useGetMessage();
   const lastMessageRef = useRef(null);
-  const { pendingNavigation, setPendingNavigation } = useConversation();
+  const { pendingNavigation, setPendingNavigation, setPendingScrollMessageId } = useConversation();
   const lastMessageId = messages.length > 0 ? messages[messages.length - 1]?._id : null;
   const prevLastMessageIdRef = useRef(null);
 
   useGetSocketMessage();
-  console.log("Messages in Messages.jsx:", messages);
 
   useEffect(() => {
+    if (loading) {
+      return;
+    }
     if (pendingNavigation?.messageId) {
       const targetId = pendingNavigation.messageId;
       const element = document.getElementById(`message-${targetId}`);
       if (element) {
-        scrollToAndHighlightMessage(targetId);
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
+        setPendingScrollMessageId(targetId);
         setPendingNavigation(null);
         prevLastMessageIdRef.current = lastMessageId;
       }
@@ -37,7 +40,7 @@ function Messages() {
         prevLastMessageIdRef.current = lastMessageId;
       }
     }
-  }, [messages, pendingNavigation, setPendingNavigation, lastMessageId]);
+  }, [messages, pendingNavigation, setPendingNavigation, setPendingScrollMessageId, lastMessageId, loading]);
 
   if (loading) {
     return (
