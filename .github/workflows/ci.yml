@@ -57,5 +57,18 @@ jobs:
           context: ./Frontend
           push: true
           build-args: |
-            VITE_API_URL=http://13.201.93.99:5002
+            VITE_API_URL=http://3.7.12.124:5002
           tags: saurabhk9919/webchat-frontend:latest
+
+      # Deploy to EC2
+      - name: Deploy to EC2
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/WebChat
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d --force-recreate
