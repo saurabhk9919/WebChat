@@ -1,7 +1,7 @@
 import { buildSummaryPrompt, normalizeSummaryType } from "../prompts/summaryPrompt.js";
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_MODEL = 'llama-3.1-8b-instant';
+const GROQ_MODEL = 'qwen/qwen3.6-27b';
 
 const LIMIT_TO_COUNT = {
     'last-5': 5,

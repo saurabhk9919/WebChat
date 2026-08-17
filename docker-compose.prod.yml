@@ -1,0 +1,32 @@
+services:
+
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+
+  backend:
+    image: saurabhk9919/webchat-backend:latest
+    restart: unless-stopped
+    env_file:
+      - ./Backend/.env
+    environment:
+      NODE_ENV: production
+      PORT: 5002
+      MONGO_URI: mongodb://mongo:27017/WebChat-MERN
+    depends_on:
+      - mongo
+    ports:
+      - "5002:5002"
+
+  frontend:
+    image: saurabhk9919/webchat-frontend:latest
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+volumes:
+  mongo_data:

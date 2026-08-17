@@ -1,7 +1,7 @@
 import actionPrompt from "../prompts/actionPrompt.js";
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
-const GROQ_MODEL = "llama-3.1-8b-instant";
+const GROQ_MODEL = "qwen/qwen3.6-27b";
 
 class ActionExtractionError extends Error {
     constructor(message, statusCode = 500) {
