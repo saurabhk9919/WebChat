@@ -33,3 +33,22 @@ jobs:
       - name: Build frontend
         working-directory: Frontend
         run: npm run build
+
+      # Docker setup
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Backend Docker image
+      - name: Build backend Docker image
+        run: |
+          docker build \
+            -t saurabhk9919/webchat-backend:latest \
+            ./Backend
+
+      # Frontend Docker image
+      - name: Build frontend Docker image
+        run: |
+          docker build \
+            --build-arg VITE_API_URL=http://13.201.93.99:5002 \
+            -t saurabhk9919/webchat-frontend:latest \
+            ./Frontend
